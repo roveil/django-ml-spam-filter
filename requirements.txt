@@ -1,0 +1,19 @@
+﻿# requirements
+celery==4.3.0
+django==2.2.5
+djangorestframework==3.10.1
+django-cacheops==4.2
+django-pg-bulk-update==3.0.0
+emoji==0.5.4
+funcy==1.13
+gunicorn==19.9.0
+psycopg2==2.8.3
+pymorphy2==0.8
+pytz==2019.2
+redis==3.3.8
+sentry-sdk==0.10.2
+sqlparse==0.3.0
+six==1.12.0
+statsd==3.3.0
+typing==3.7.4
+

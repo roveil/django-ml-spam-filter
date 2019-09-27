@@ -1,0 +1,17 @@
+.idea/
+*/venv*/
+static/*
+*egg-info*
+*/__pycache__/*
+
+
+*.log
+*.pot
+*.pyc
+*.session
+*.egg
+*.sqlite3
+*config.py*
+*sublime*
+*celerybeat*
+.DS_Store
