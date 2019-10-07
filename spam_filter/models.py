@@ -10,6 +10,7 @@ from django.db.models import Sum
 from django_pg_bulk_update.manager import BulkUpdateManager
 
 from spam_filter.content_parser import ContentParser
+from spam_filter.utils import get_content_from_file
 
 logger = logging.getLogger('default')
 
@@ -44,13 +45,8 @@ class Dictionary(models.Model):
         то обучает старый словарь
         :return: None
         """
-
-        def _get_content_from_file(filename: str):
-            with open(filename, 'r') as f:
-                return f.read().split(delimiter)
-
-        spam_content = _get_content_from_file(spam_file_path)
-        ham_content = _get_content_from_file(ham_file_path)
+        spam_content = get_content_from_file(spam_file_path, delimiter)
+        ham_content = get_content_from_file(ham_file_path, delimiter)
 
         learning_content = chain(((content, True) for content in spam_content),
                                  ((content, False) for content in ham_content))
@@ -174,10 +170,6 @@ class Dictionary(models.Model):
         """
         errors = []
 
-        def _get_content_from_file(filename: str):
-            with open(filename, 'r') as f:
-                return f.read().split(delimiter)
-
         def _check_for_errors(content: List[str], spam: bool):
             for index, msg in enumerate(content):
                 logger.info('Proccess record: %d in %s spam dictionary' % (index, spam))
@@ -186,8 +178,8 @@ class Dictionary(models.Model):
                     errors.append((msg, spam))
 
         # Письма, которых не было в обучении
-        spam_content = _get_content_from_file(spam_file_path)[:num_msg_to_check]
-        ham_content = _get_content_from_file(ham_file_path)[:num_msg_to_check]
+        spam_content = get_content_from_file(spam_file_path, delimiter)[:num_msg_to_check]
+        ham_content = get_content_from_file(ham_file_path, delimiter)[:num_msg_to_check]
 
         _check_for_errors(spam_content, True)
         _check_for_errors(ham_content, False)

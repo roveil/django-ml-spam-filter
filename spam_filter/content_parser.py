@@ -7,6 +7,9 @@ from html.parser import HTMLParser as BaseHTMLParser
 
 class HTMLParser(BaseHTMLParser):
 
+    def error(self, message):
+        pass
+
     def __init__(self):
         super().__init__()
         self.parse_data = []
@@ -32,8 +35,8 @@ class ContentParser:
     rus_months = {'январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'ноябрь',
                   'декабрь'}
 
-    @classmethod
-    def get_html_stripped_content(cls, body: str, delimiter: str = ' ') -> str:
+    @staticmethod
+    def get_html_stripped_content(body: str, delimiter: str = ' ') -> str:
         """
         Получает строку, очищенную от html-содержимого
         :param body: содержимое
@@ -43,8 +46,8 @@ class ContentParser:
         parser = HTMLParser()
         return parser.get_clear_data(body, delimiter)
 
-    @classmethod
-    def identify_emoji(cls, body: str, delimiter: str = ' ') -> str:
+    @staticmethod
+    def identify_emoji(body: str, delimiter: str = ' ') -> str:
         """
         Находит emoji в контенте и отделяет их в отдельное слово.
         :param body: контент
@@ -70,8 +73,8 @@ class ContentParser:
 
         return delimiter.join(result)
 
-    @classmethod
-    def replace_special_content(cls, body: str) -> str:
+    @staticmethod
+    def replace_special_content(body: str) -> str:
         """
         Заменяет ссылки (в том числе в html тегах) на 'urladdr', емейл-адреса на 'emailaddr', отдельно стоящий знак
         $ на 'dollar'. Убираем табуляцию переносы строк и пробелы
