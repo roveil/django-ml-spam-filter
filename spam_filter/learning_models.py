@@ -64,7 +64,7 @@ class LearningModel(ABC):
         :param spam: MailContentSource со спамом
         :param ham: MailContentSource с хамом
         :param num_msg_to_check: Число сообщений попадающих в выборку
-        :return: Список, содержащий
+        :return: Список, содержащий ошибочно определенные сообщения. (сообщение, predicted_spam_flag)
         """
         errors = []
 
@@ -222,11 +222,11 @@ class NN(LearningModel):
         NNStructure.objects.update_or_create(defaults={'weights': weights})
 
     @classmethod
-    def _get_model(cls, init: bool = False):
+    def _get_model(cls, init: bool = False) -> Sequential:
         """
         Пытается получить модель из БД или инициализирует новую
-        :param init:
-        :return:
+        :param init: Если False - попытаться получить модель из БД
+        :return: Объект Sequential нейросети
         """
         model = Sequential()
         model.add(Dense(128, activation='relu', input_shape=(cls.num_metrics,)))
@@ -303,7 +303,13 @@ class NN(LearningModel):
         return super().check_for_valid(spam, ham, num_msg_to_check=num_msg_to_check, nn=nn)
 
     @classmethod
-    def check_message_for_spam(cls, message: str, nn: Sequential = None, **kwargs) -> bool:
+    def check_message_for_spam(cls, message: str, nn: Sequential = None) -> bool:
+        """
+        Проверяет сообщение на спам
+        :param message: Сообщение
+        :param nn: Опционально, экземпляр модели нейросети, чтобы не получать ее каждый раз из БД
+        :return: boolean. Сообщение спам или нет
+        """
         prepared_data = ContentParser.prepare_for_pnn(message)
 
         if prepared_data:

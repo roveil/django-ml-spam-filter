@@ -3,6 +3,10 @@ from django.db.models import Manager, QuerySet
 
 
 class NNQuerySet(QuerySet):
+    """
+    Manager модели нейросети, непозволяющий создавать более одной записи в БД.
+    В таблице мы храним одну строку с весами нейросети
+    """
     def create(self, **kwargs):
         if not self.exists():
             return super().create(**kwargs)

@@ -189,7 +189,7 @@ class ContentParser:
         """
         Получить количество цветов css из html содержимого
         :param body: содержимое
-        :return:
+        :return: количество цветов в документе
         """
         return len(re.findall(r'color\s*:\s*(([A-Za-z]+)|(#[A-Fa-f0-9]+)|)', body))
 
@@ -218,7 +218,6 @@ class ContentParser:
         размер полезного контента в байтах, сли есть полезная информация иначе False
         """
         # не определяю слова сразу, т.к. необходимо узнать количество слов в верхнем регистре.
-        # и количество смайликов
         parsed_body = cls.parse(body, identify_words=False)
 
         if parsed_body:
