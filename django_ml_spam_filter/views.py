@@ -1,5 +1,5 @@
-from django_naive_bayes_spam_filter.exceptions import Error404, Error500
-from django_naive_bayes_spam_filter.responses import APIResponse
+from django_ml_spam_filter.exceptions import Error404, Error500
+from django_ml_spam_filter.responses import APIResponse
 
 
 def handler404(request, _):

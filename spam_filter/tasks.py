@@ -4,19 +4,18 @@ from django.db import transaction
 from django.utils.timezone import now
 from statsd.defaults.django import statsd
 
-from spam_filter.models import Dictionary, LearningMessage
+from spam_filter.learning_models import BayesModel, NN
+from spam_filter.models import LearningMessage
 
 
 @shared_task(queue=settings.CELERY_QUEUE, ignore_result=True)
+@statsd.timer('tasks.process_learning_message')
 def process_learning_message():
-    with statsd.timer('tasks.process_learning_message'):
-        statsd.incr('tasks.process_learning_message')
-
+    if settings.AUTO_LEARNING_ENABLED:
         with transaction.atomic():
             learning_content = LearningMessage.objects.filter(processed__isnull=True).select_for_update() \
                 .values_list('message', 'spam')
 
-            learn_words_num = 4 * len(learning_content)  # Будем брать в среднем 4 самых популярных слова на сообщение
-            Dictionary.train_dictionary(learning_content, learn_words_num=learn_words_num)
-
+            BayesModel.train(learning_content=learning_content)
+            NN.train(learning_content=learning_content)
             learning_content.update(processed=now())

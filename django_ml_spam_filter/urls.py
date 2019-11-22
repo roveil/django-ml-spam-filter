@@ -1,4 +1,4 @@
-"""django_naive_bayes_spam_filter URL Configuration
+"""django_ml_spam_filter URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.1/topics/http/urls/
@@ -19,5 +19,5 @@ urlpatterns = [
     re_path('', include('spam_filter.urls')),
 ]
 
-handler404 = 'django_naive_bayes_spam_filter.views.handler404'
-handler500 = 'django_naive_bayes_spam_filter.views.handler500'
+handler404 = 'django_ml_spam_filter.views.handler404'
+handler500 = 'django_ml_spam_filter.views.handler500'

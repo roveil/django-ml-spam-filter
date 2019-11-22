@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Dictionary',
+            name='BayesDictionary',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('word', models.CharField(db_index=True, max_length=255, unique=True)),
@@ -26,6 +26,13 @@ class Migration(migrations.Migration):
                 ('message', models.TextField()),
                 ('spam', models.BooleanField()),
                 ('processed', models.DateTimeField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='NNStructure',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('weights', models.BinaryField()),
             ],
         ),
     ]
