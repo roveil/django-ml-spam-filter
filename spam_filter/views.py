@@ -2,8 +2,9 @@ import logging
 from django.conf import settings
 from rest_framework.views import APIView
 
-from django_naive_bayes_spam_filter.responses import APIResponse
-from spam_filter.models import Dictionary, LearningMessage
+from django_ml_spam_filter.responses import APIResponse
+from spam_filter.learning_models import NN
+from spam_filter.models import LearningMessage
 from spam_filter.serializers import CheckContentSerializer, LearnContentSerializer
 from spam_filter.tasks import process_learning_message
 
@@ -16,7 +17,7 @@ class CheckHandler(APIView):
     def post(self, request):
         serializer = CheckContentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        spam = Dictionary.check_message_for_spam(serializer.validated_data['content'])
+        spam = NN.check_message_for_spam(serializer.validated_data['content'])
 
         if settings.AUTO_LEARNING_ENABLED:
             LearningMessage.objects.create(message=serializer.validated_data['content'], spam=spam)
