@@ -8,8 +8,8 @@ from spam_filter.learning_models import BayesModel, NN
 from spam_filter.models import LearningMessage
 
 
-@statsd.timer('tasks.process_learning_message')
 @shared_task(queue=settings.CELERY_QUEUE, ignore_result=True)
+@statsd.timer('tasks.process_learning_message')
 def process_learning_message():
     if settings.AUTO_LEARNING_ENABLED:
         with transaction.atomic():

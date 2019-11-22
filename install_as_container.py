@@ -15,7 +15,7 @@ def main():
     parser.add_argument("path", type=str, help="Destination docker-container build path")
     args = parser.parse_args()
 
-    dest_path = os.path.join(args.path, 'cq.spam-filter')
+    dest_path = os.path.join(args.path, 'nn-bayes-spam-filter')
     shutil.copytree('docker_installation', dest_path)
 
     git_proj_app_path = os.path.join(dest_path, 'build', 'app')
