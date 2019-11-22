@@ -27,11 +27,25 @@ class LearningModel(ABC):
 
     @classmethod
     def train(cls, spam: Optional[MailContentSource] = None, ham: Optional[MailContentSource] = None,
-              init: bool = False, batch_size: int = 1000, **kwargs):
-        assert spam or ham, 'One of spam or ham should be provided'
+              learning_content: TIterable[Tuple[str, bool]] = None, init: bool = False, batch_size: int = 1000,
+              **kwargs):
+        """
+        Тренирует модель используя источники спам и хам писем MailContentSource или готовое к тренировке содержимое
+        learning_content.
+        :param spam: MailContentSource со спамом
+        :param ham: MailContentSource с хамом
+        :param learning_content: Уже готовый к обработке контент. Список с Tuple(сообщение, флаг спама)
+        :param init: Если параметр установлен, то удаляет предыдущий словарь и инициализирует новый. Если нет,
+        то обучает старый словарь
+        :param batch_size: Размер порции обучения
+        :param kwargs: Дополнительные именованные параметры для вызова _train
+        :return: None
+        """
+        if not learning_content:
+            assert spam or ham, 'One of spam or ham should be provided'
 
-        learning_content = chain(((content, True) for content in spam.get_content()) if spam else (),
-                                 ((content, False) for content in ham.get_content()) if ham else ())
+            learning_content = chain(((content, True) for content in spam.get_content()) if spam else (),
+                                     ((content, False) for content in ham.get_content()) if ham else ())
 
         iterator = iter(learning_content)
         first = True
@@ -85,18 +99,20 @@ class BayesModel(LearningModel):
 
     @classmethod
     def train(cls, spam: Optional[MailContentSource] = None, ham: Optional[MailContentSource] = None,
-              init: bool = False, batch_size: int = 1000, min_num_word_appearance: int = 1):
+              learning_content: TIterable[Tuple[str, bool]] = None, init: bool = False, batch_size: int = 1000,
+              min_num_word_appearance: int = 1) -> None:
         """
         Тренируем модель используя источники спам и хам писем MailContentSource
         :param spam: MailContentSource со спамом
         :param ham: MailContentSource с хамом
+        :param learning_content: Уже готовый к обработке контент. Список с Tuple(сообщение, флаг спама)
         :param min_num_word_appearance: Минимальное количество встречаемости слова для попадания в словарь
         :param init: Если параметр установлен, то удаляет предыдущий словарь и инициализирует новый. Если нет,
         то обучает старый словарь
         :param batch_size: Размер порции обучения
         :return: None
         """
-        return super().train(spam, ham, init=init, batch_size=batch_size,
+        return super().train(spam, ham, learning_content=learning_content, init=init, batch_size=batch_size,
                              min_num_word_appearance=min_num_word_appearance)
 
     @staticmethod
