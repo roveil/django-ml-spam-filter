@@ -5,17 +5,17 @@ import pickle
 from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
 from itertools import chain, islice
-from typing import List, Tuple, Union, Iterable as TIterable, Optional
+from typing import List, Tuple, Union, Iterable as TIterable, Optional, Type
 
 from cacheops import invalidate_model, invalidate_obj
-from django.conf import settings
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Model
+from django.utils.decorators import classproperty
 from keras.metrics import binary_accuracy
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from pathos.multiprocessing import ProcessPool as Pool
 
+from django_ml_spam_filter.utils import exec_in_parallel
 from spam_filter.content_parser import ContentParser
 from spam_filter.mail_source import MailContentSource
 from spam_filter.models import BayesDictionary, NNStructure
@@ -69,6 +69,11 @@ class LearningModel(ABC):
     def check_message_for_spam(cls, message: str, **kwargs) -> bool:
         pass
 
+    @classproperty
+    @abstractmethod
+    def db_model(cls) -> Type[Model]:
+        pass
+
     @classmethod
     def check_for_valid(cls, spam: MailContentSource, ham: MailContentSource, num_msg_to_check: int = 100, **kwargs) \
             -> List[Tuple[str, bool]]:
@@ -116,8 +121,7 @@ class BayesModel(LearningModel):
                              min_num_word_appearance=min_num_word_appearance)
 
     @staticmethod
-    def _train_parse(iterable_variables) -> Optional[defaultdict]:
-        index, (msg, spam) = iterable_variables
+    def _train_parse(index, msg, spam) -> dict:
         dictionary = defaultdict(lambda: [0, 0, 0])
         value_list_index = 1 if spam else 2
         words = set(word for word in ContentParser.parse(msg).split(' ') if len(word) > 2) if msg else {}
@@ -128,7 +132,8 @@ class BayesModel(LearningModel):
                 dictionary[word][0] += 1
                 dictionary[word][value_list_index] += 1
 
-            return dictionary
+            # Pickle не может задампить defaultdict
+            return dict(dictionary)
 
     @classmethod
     def _train(cls, learning_content: Union[TIterable[Tuple[str, bool]], Tuple[str, bool]],
@@ -147,9 +152,10 @@ class BayesModel(LearningModel):
         # word - ключ, value[0] - всего, value[1] - появлений в spam, value[2] - появлений в ham
         dictionary = defaultdict(lambda: [0, 0, 0])
 
-        with Pool(processes=settings.NUM_CPU_CORES) as pool:
-            results = ((k, v) for item in pool.map(cls._train_parse, enumerate(learning_content)) if item
-                       for k, v in item.items())
+        func_args = [((index, msg, spam_flag), {}) for index, (msg, spam_flag) in enumerate(learning_content)]
+
+        results = ((k, v) for item in exec_in_parallel(cls._train_parse, func_args) if item
+                   for k, v in item.items())
 
         for k, v in results:
             dictionary[k] = list(map(lambda x, y: x + y, dictionary[k], v))
@@ -172,13 +178,10 @@ class BayesModel(LearningModel):
             with transaction.atomic():
                 if init:
                     BayesDictionary.objects.all().delete()
-                    update_words = None
-                else:
-                    update_words = list(BayesDictionary.objects.filter(word__in=[item['word'] for item in updates])
-                                        .select_for_update())
 
-                BayesDictionary.objects.bulk_update_or_create(updates, key_fields='word',
-                                                              set_functions={'spam_count': '+', 'ham_count': '+'})
+                update_words = BayesDictionary.objects \
+                    .bulk_update_or_create(updates, key_fields='word', returning='*',
+                                           set_functions={'spam_count': '+', 'ham_count': '+'})
                 transaction.on_commit(lambda: on_commit(update_words, init))
 
     @classmethod
@@ -228,6 +231,14 @@ class BayesModel(LearningModel):
 
         return spam_probability if return_probability else spam_probability > 0.9
 
+    @classproperty
+    def db_model(cls) -> Type[Model]:
+        """
+        Возвращает класс django.db.models, в котором хранятся данные модели
+        :return: django.db.models class
+        """
+        return BayesDictionary
+
 
 class NN(LearningModel):
     num_metrics = 7
@@ -265,8 +276,7 @@ class NN(LearningModel):
         return model
 
     @staticmethod
-    def _train_parse(iterable_variables) -> Optional[Tuple]:
-        index, (msg, spam) = iterable_variables
+    def _train_parse(index, msg, spam_flag) -> Optional[Tuple]:
         prepared_data = ContentParser.prepare_for_pnn(msg)
 
         if prepared_data:
@@ -274,7 +284,7 @@ class NN(LearningModel):
             bayes_prob = BayesModel.check_message_for_spam(parsed_body, return_probability=True, clear_body=True)
             logger.info('Proccessed message N: %d' % index)
 
-            return (*msg_info, bayes_prob), spam
+            return (*msg_info, bayes_prob), spam_flag
 
     @classmethod
     def _train(cls, learning_content: Union[TIterable[Tuple[str, bool]], Tuple[str, bool]], init: bool = False):
@@ -288,12 +298,9 @@ class NN(LearningModel):
         if isinstance(learning_content, tuple):
             learning_content = [learning_content]
 
-        # Костыль, но более внятного решения проблемы коннекта к БД при multiprocessing не нашел
-        from django.db import connections
-        connections.close_all()
+        func_args = [((index, msg, spam_flag), {}) for index, (msg, spam_flag) in enumerate(learning_content)]
 
-        with Pool(processes=settings.NUM_CPU_CORES) as pool:
-            results = (item for item in pool.map(cls._train_parse, enumerate(learning_content)) if item)
+        results = (item for item in exec_in_parallel(cls._train_parse, func_args, need_db_refresh=True) if item)
 
         # X - вход. Пустой np.array, который динамически заполнится далее
         x = np.empty((0, cls.num_metrics), dtype=np.float64)
@@ -338,3 +345,11 @@ class NN(LearningModel):
             return bool(result > 0.6)
         else:
             return False
+
+    @classproperty
+    def db_model(cls) -> Type[Model]:
+        """
+        Возвращает класс django.db.models, в котором хранятся данные модели
+        :return: django.db.models class
+        """
+        return NNStructure

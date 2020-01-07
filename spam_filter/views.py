@@ -5,7 +5,7 @@ from django_ml_spam_filter.responses import APIResponse
 from spam_filter.learning_models import NN
 from spam_filter.models import LearningMessage
 from spam_filter.serializers import CheckContentSerializer, LearnContentSerializer
-from spam_filter.tasks import process_learning_message
+from spam_filter.tasks import process_auto_learning
 
 logger = logging.getLogger('default')
 
@@ -36,6 +36,6 @@ class LearnHandler(APIView):
         LearningMessage.objects.bulk_create(messages)
 
         if serializer.validated_data['immediately']:
-            process_learning_message.delay()
+            process_auto_learning.delay()
 
         return APIResponse()

@@ -9,8 +9,8 @@ from spam_filter.models import LearningMessage
 
 
 @shared_task(queue=settings.CELERY_QUEUE, ignore_result=True)
-@statsd.timer('tasks.process_learning_message')
-def process_learning_message():
+@statsd.timer('tasks.process_auto_learning')
+def process_auto_learning():
     if settings.AUTO_LEARNING_ENABLED:
         with transaction.atomic():
             learning_content = LearningMessage.objects.filter(processed__isnull=True).select_for_update() \

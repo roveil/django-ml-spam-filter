@@ -18,9 +18,9 @@
   ```shell
   python install_as_container.py /path/to/container/workdir
   ```
-* Если docker установлен, то исполнить скрипт /path/to/container/workdir/service.sh
+* Если docker установлен, то исполнить скрипт /path/to/container/workdir/django_ml_spam_filter/service.sh
   ```
-  sudo /path/to/container/workdir/service.sh 
+  sudo /path/to/container/workdir/django_ml_spam_filter/service.sh 
   ```
 #### Настроика различных переменных происходит в .env, private/environment_common, private/config.container.py
 

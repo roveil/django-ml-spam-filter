@@ -1,0 +1,18 @@
+[
+  {
+    "model": "spam_filter.LearningMessage",
+    "pk": 100500,
+    "fields": {
+      "message": "ham ham ham ham ham ham ham",
+      "spam": false
+     }
+  },
+  {
+    "model": "spam_filter.LearningMessage",
+    "pk": 100501,
+    "fields": {
+      "message": "spam spam spam spam spam spam",
+      "spam": true
+    }
+  }
+]

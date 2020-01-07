@@ -1,12 +1,15 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Manager, QuerySet
+from django.db.models import QuerySet
+from django_pg_bulk_update.manager import BulkUpdateManager
+from django_pg_returning import UpdateReturningMixin
 
 
 class NNQuerySet(QuerySet):
     """
-    Manager модели нейросети, непозволяющий создавать более одной записи в БД.
+    Queryset модели нейросети, непозволяющий создавать более одной записи в БД.
     В таблице мы храним одну строку с весами нейросети
     """
+
     def create(self, **kwargs):
         if not self.exists():
             return super().create(**kwargs)
@@ -23,4 +26,10 @@ class NNQuerySet(QuerySet):
         return super().get()
 
 
-NNManager = Manager.from_queryset(NNQuerySet)()
+class NNManager(UpdateReturningMixin, BulkUpdateManager):
+    def get_queryset(self):
+        return NNQuerySet(using=self.db, model=self.model)
+
+
+class BayesDictonaryManager(UpdateReturningMixin, BulkUpdateManager):
+    pass

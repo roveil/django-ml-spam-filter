@@ -1,16 +1,16 @@
 ﻿# requirements
 celery==4.3.0
-django==2.2.5
+django==2.2.8
 djangorestframework==3.10.1
 django-cacheops==4.2
-django-pg-bulk-update==3.0.0
+django-pg-bulk-update==3.1.0
+django-pg-returning==1.2.4
 emoji==0.5.4
 funcy==1.13
 gunicorn==19.9.0
 keras==2.3.1
 nltk==3.4.5
 numpy==1.17.3
-pathos==0.2.5
 perceval==0.12.24
 psycopg2==2.8.4
 pymorphy2==0.8

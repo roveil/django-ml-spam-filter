@@ -15,10 +15,10 @@ def main():
     parser.add_argument("path", type=str, help="Destination docker-container build path")
     args = parser.parse_args()
 
-    dest_path = os.path.join(args.path, 'nn-bayes-spam-filter')
+    dest_path = os.path.join(args.path, 'django_ml_spam_filter')
     shutil.copytree('docker_installation', dest_path)
 
-    git_proj_app_path = os.path.join(dest_path, 'build', 'app')
+    git_proj_app_path = os.path.join(dest_path, 'app')
     shutil.copytree(os.getcwd(), git_proj_app_path, ignore=copy_git_proj_func)
 
 
