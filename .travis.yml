@@ -15,7 +15,7 @@ python:
   - 3.8
 
 before_script:
-  - mv django_ml_spam_filter/config.travis.py cqapi/config.py
+  - mv django_ml_spam_filter/config.travis.py django_ml_spam_filter/config.py
   - psql -c 'CREATE ROLE test;' -U postgres
   - psql -c 'ALTER ROLE test WITH SUPERUSER;' -U postgres
   - psql -c 'ALTER ROLE test WITH LOGIN;' -U postgres
