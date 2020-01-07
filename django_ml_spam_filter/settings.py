@@ -127,8 +127,8 @@ CELERY_QUEUE = getattr(config, 'CELERY_QUEUE', 'spam_filter_main')
 BROKER_URL = getattr(config, 'BROKER_URL', 'amqp://')
 
 CELERYBEAT_SCHEDULE = {
-    'process_learning_message': {
-        'task': 'spam_filter.tasks.process_learning_message',
+    'process_auto_learning': {
+        'task': 'spam_filter.tasks.process_auto_learning',
         'schedule': datetime.timedelta(minutes=30),
     }
 }

@@ -1,8 +1,6 @@
 from django.db import models
 
-from django_pg_bulk_update.manager import BulkUpdateManager
-
-from spam_filter.manager import NNManager
+from spam_filter.manager import NNManager, BayesDictonaryManager
 
 
 class LearningMessage(models.Model):
@@ -16,10 +14,10 @@ class BayesDictionary(models.Model):
     spam_count = models.PositiveIntegerField(default=0)
     ham_count = models.PositiveIntegerField(default=0)
 
-    objects = BulkUpdateManager()
+    objects = BayesDictonaryManager()
 
 
 class NNStructure(models.Model):
     weights = models.BinaryField()
 
-    objects = NNManager
+    objects = NNManager()
