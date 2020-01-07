@@ -22,12 +22,12 @@
   ```
   sudo /path/to/container/workdir/service.sh 
   ```
-#### Настроика различных переменных происходит в .env, private/environment_common, build/config.container.py
+#### Настроика различных переменных происходит в .env, private/environment_common, private/config.container.py
 
 #### Для того, чтобы обучить контейнер необходимо:
 * Собрать контейнер, прокинув папку хоста в к контейнер: docker-compose.yml (service: app, секция volumes)
 * Скопировать файлы для обучения (Директория с mbox файлами или файл с сообщениями) в расшаренную папку
-* Произвести обучение исполнив в manage.py shell подобный код
+* Произвести обучение исполнив в manage.py shell следующий код:
   ```
   python manage.py shell
   from spam_filter.learning_models import *
