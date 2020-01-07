@@ -27,11 +27,9 @@ RUN  addgroup --gid 1000 pyuser \
   && mkdir -p /app /app/svc /app/public \
   && chown -R pyuser:pyuser /app \
   && chmod 755 /app /app/svc /app/public \
-  && install -d -o pyuser -g pyuser -m 755 /app \
   && echo 'Done.'
 
-# Copy requirements.conf to requirements.txt
-COPY --chown=pyuser:pyuser ./app/requirements.txt /app/svc/requirements.txt
+COPY --chown=pyuser:pyuser ./app /app/svc
 
 # Install dependencies
 RUN apt-get update \
@@ -42,8 +40,7 @@ RUN apt-get update \
   && echo 'Done.'
 
 # Copy project dir with base config
-COPY --chown=pyuser:pyuser ./app/ /app/svc/
-COPY --chown=pyuser:pyuser config.container.py /app/svc/django_ml_spam_filter/config.py
+COPY --chown=pyuser:pyuser ./private/config.container.py /app/svc/django_ml_spam_filter/config.py
 
 USER pyuser
 WORKDIR /app/svc

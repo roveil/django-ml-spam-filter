@@ -54,8 +54,8 @@ services:
   base:
     <<: *commons
     build:
-      context: build
-      dockerfile: dockerfile.spam-filter
+      context: .
+      dockerfile: Dockerfile
       cache_from:
         - tensorflow/tensorflow:nightly-py3
         - local/spam-filter:${APP_TAG:-latest}
