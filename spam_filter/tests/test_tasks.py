@@ -8,10 +8,6 @@ from spam_filter.tasks import process_auto_learning
 class ProcessAutoLearningTest(TransactionTestCase):
     fixtures = ['spam_filter_learning_message']
 
-    def setUp(self):
-        BayesModel.db_model.objects.all().delete()
-        NN.db_model.objects.all().delete()
-
     @override_settings(AUTO_LEARNING_ENABLED=True)
     def test_process_auto_learning(self):
         process_auto_learning()
