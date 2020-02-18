@@ -12,7 +12,6 @@ services:
 python:
   - 3.6
   - 3.7
-  - 3.8
 
 before_script:
   - mv django_ml_spam_filter/config.travis.py django_ml_spam_filter/config.py
