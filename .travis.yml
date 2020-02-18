@@ -7,7 +7,7 @@ cache:
 services:
   - postgresql
   - rabbitmq
-  - redis-server
+  - redis
 
 python:
   - 3.6

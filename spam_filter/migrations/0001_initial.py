@@ -35,4 +35,8 @@ class Migration(migrations.Migration):
                 ('weights', models.BinaryField()),
             ],
         ),
+        migrations.RunSQL("CREATE UNIQUE INDEX IF NOT EXISTS unique_nnstructure_index "
+                          "ON spam_filter_nnstructure ((id IS NOT NULL));",
+                          reverse_sql="DROP INDEX IF EXISTS unique_nnstructure_index;",
+                          hints={'model_name': 'spam_filter.NNStructure'})
     ]
