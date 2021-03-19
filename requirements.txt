@@ -1,6 +1,6 @@
 ﻿celery==4.3.0
 django==2.2.10
-djangorestframework==3.10.1
+djangorestframework==3.11.2
 django-cacheops==4.2
 django-pg-bulk-update==3.1.0
 django-pg-returning==1.2.4
