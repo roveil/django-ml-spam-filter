@@ -19,5 +19,5 @@ sentry-sdk==0.10.2
 six==1.12.0
 sqlparse==0.3.0
 statsd==3.3.0
-tensorflow==2.0.1
+tensorflow==2.5.3
 typing==3.7.4
